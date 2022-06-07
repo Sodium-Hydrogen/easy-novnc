@@ -12,12 +12,14 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/shurcooL/vfsgen"
 	"github.com/spkg/zipfs"
 )
 
-const noVNCZip = "https://github.com/novnc/noVNC/archive/master.zip"
+const targetRootDir = "noVNC/"
+const noVNCZip = "https://github.com/novnc/noVNC/archive/refs/tags/v1.3.0.zip"
 const vncScript = `
 	try {
 		function parseQuery(e){for(var o=e.split("&"),n={},t=0;t<o.length;t++){var d=o[t].split("="),p=decodeURIComponent(d[0]),r=decodeURIComponent(d[1]);if(void 0===n[p])n[p]=decodeURIComponent(r);else if("string"==typeof n[p]){var i=[n[p],decodeURIComponent(r)];n[p]=i}else n[p].push(decodeURIComponent(r))}return n};
@@ -93,6 +95,8 @@ func modifyZip(zf string) error {
 	defer zw.Close()
 
 	var found bool
+	// The root file to rename all to
+	parent := ""
 	for _, e := range zr.File {
 		var w io.Writer
 
@@ -106,8 +110,19 @@ func modifyZip(zf string) error {
 			return err
 		}
 
+		if e.Name[len(e.Name)-1] == '/' {
+			if strings.Count(e.Name, "/") == 1{
+				parent = e.Name
+			}
+		}
+
+		if parent != "" {
+			e.FileHeader.Name = strings.Replace(e.FileHeader.Name, parent, targetRootDir, 1)
+		}
+
 		if filepath.Base(e.Name) == "vnc.html" {
 			found = true
+
 			fbuf = bytes.ReplaceAll(fbuf, []byte("</body>"), []byte(fmt.Sprintf("<script>%s</script></body>", vncScript)))
 			fi, err := os.Stat("novnc_generate.go")
 			if err != nil {
