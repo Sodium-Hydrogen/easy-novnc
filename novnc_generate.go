@@ -6,6 +6,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"errors"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -19,7 +20,7 @@ import (
 )
 
 const targetRootDir = "noVNC/"
-const noVNCZip = "https://github.com/novnc/noVNC/archive/refs/tags/v1.3.0.zip"
+const githubAPI = "https://api.github.com/repos/novnc/noVNC/"
 const vncScript = `
 	try {
 		function parseQuery(e){for(var o=e.split("&"),n={},t=0;t<o.length;t++){var d=o[t].split("="),p=decodeURIComponent(d[0]),r=decodeURIComponent(d[1]);if(void 0===n[p])n[p]=decodeURIComponent(r);else if("string"==typeof n[p]){var i=[n[p],decodeURIComponent(r)];n[p]=i}else n[p].push(decodeURIComponent(r))}return n};
@@ -32,9 +33,47 @@ const vncScript = `
 		console.log(ex);
 	}
 `
+type release_data struct {
+	Tag_name string
+	Zipball_url string
+}
 
 func main() {
-	resp, err := http.Get(noVNCZip)
+
+	// Allow dynamic referencing to any release or latest commit
+	var zipURL string
+	var comment string
+
+	if len(os.Args) == 1{
+		resp, err := http.Get(githubAPI+"releases/latest")
+		if err != nil {
+			panic(err)
+		} else if resp.StatusCode != 200 {
+			panic("Invalid url");
+		}
+
+		var data release_data
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
+		err = json.Unmarshal(body, &data)
+		if err != nil {
+			panic(err)
+		}
+		zipURL = data.Zipball_url
+		comment = "noVNC is the latest release of noVNC from GitHub as a http.FileSystem"
+	} else if len(os.Args) == 2 && os.Args[1] != "nightly" {
+		zipURL = githubAPI+"zipball/"+os.Args[1]
+		comment = "noVNC is the tagged version ("+os.Args[1]+") of noVNC from GitHub as a http.FileSystem"
+	} else if len(os.Args) == 2 {
+		zipURL = githubAPI+"zipball"
+		comment = "noVNC is the latest commit of noVNC from GitHub as a http.FileSystem"
+	} else {
+		os.Exit(1)
+	}
+
+	resp, err := http.Get(zipURL)
 	if err != nil {
 		panic(err)
 	}
@@ -66,7 +105,7 @@ func main() {
 		Filename:        "novnc_generated.go",
 		PackageName:     "main",
 		VariableName:    "noVNC",
-		VariableComment: "noVNC is the latest version of noVNC from GitHub as a http.FileSystem",
+		VariableComment: comment,
 	})
 	if err != nil {
 		panic(err)
