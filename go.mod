@@ -1,6 +1,6 @@
-module github.com/pgaskin/easy-novnc
+module github.com/sodium-hydrogen/easy-novnc
 
-go 1.14
+go 1.20
 
 require (
 	github.com/gorilla/mux v1.7.4
@@ -9,5 +9,6 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spkg/zipfs v0.7.1
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
-	golang.org/x/tools v0.0.0-20200302213018-c4f5635f1074 // indirect
 )
+
+require golang.org/x/tools v0.0.0-20200302213018-c4f5635f1074 // indirect

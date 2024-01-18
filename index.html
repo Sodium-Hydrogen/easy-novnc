@@ -8,7 +8,7 @@
     <meta name="robots" content="noindex">
     <title>noVNC</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.4/dist/semantic.min.css">
-    <!-- easy-novnc (https://github.com/pgaskin/easy-novnc) -->
+    <!-- easy-novnc (https://github.com/sodium-hydrogen/easy-novnc) -->
     <style>
         body {
             background: #f4f4f4;
@@ -128,11 +128,25 @@
                         </div>
                     </div>
                 </div>
+                <div class="one fields">
+                    <div class="inline field">
+                        <label for="min_width">Minimum width</label>
+                        <input type="number" name="min_width" id="min_width" placeholder="0" value="{{.minWidth}}">
+                    </div>
+                </div>
+                <div class="one fields">
+                    <div class="inline field">
+                        <label for="min_height">Minimum height</label>
+                        <input type="number" name="min_height" id="min_height" placeholder="0" value="{{.minHeight}}">
+                    </div>
+                </div>
                 {{else}}
                 <input type="hidden" name="reconnect" id="reconnect" value="true">
                 <input type="hidden" name="show_dot" id="show_dot" value="true">
                 <input type="hidden" name="bell" id="bell" value="false">
                 <input type="hidden" name="view_only" id="view_only" value="{{if .defaultViewOnly}}true{{else}}false{{end}}">
+                <input type="hidden" name="min_width" id="min_width" value="{{.minWidth}}">
+                <input type="hidden" name="min_width" id="min_width" value="{{.minHeight}}">
                 {{end}}
             </form>
         </div>

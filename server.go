@@ -1,5 +1,6 @@
-// +build !index_generate
-// +build !novnc_generate
+//go:build !index_generate && !novnc_generate
+//go:generate go run novnc_generate.go
+//go:generate go run index_generate.go
 
 package main
 
@@ -19,8 +20,6 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-//go:generate go run novnc_generate.go
-//go:generate go run index_generate.go
 
 // https://stackoverflow.com/a/17871737
 var ipv6Regexp = `(?:(?:[0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,7}:|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:(?:(?::[0-9a-fA-F]{1,4}){1,6})|:(?:(?::[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(?::[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(?:ffff(?::0{1,4}){0,1}:){0,1}(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])|(?:[0-9a-fA-F]{1,4}:){1,4}:(?:(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9]))`
@@ -39,6 +38,8 @@ func main() {
 	port := pflag.Uint16P("port", "p", 5900, "The port to connect to by default")
 	addr := pflag.StringP("addr", "a", ":8080", "The address to listen on")
 	basicUI := pflag.BoolP("basic-ui", "u", false, "Hide connection options from the main screen")
+	minWidth := pflag.Uint16P("min-width", "w", 0, "The minimum width of the noVNC window")
+	minHeight := pflag.Uint16P("min-height", "m", 0, "The minimum height of the noVNC window")
 	verbose := pflag.BoolP("verbose", "v", false, "Show extra log info")
 	noURLPassword := pflag.Bool("no-url-password", false, "Do not allow password in URL params")
 	novncParams := pflag.StringSlice("novnc-params", nil, "Extra URL params for noVNC (advanced) (comma separated key-value pairs) (e.g. resize=remote)")
@@ -53,6 +54,8 @@ func main() {
 		"host":              "NOVNC_HOST",
 		"port":              "NOVNC_PORT",
 		"addr":              "NOVNC_ADDR",
+		"min-width":		 "NOVNC_MIN_WIDTH",
+		"min-height":		 "NOVNC_MIN_HEIGHT",
 		"basic-ui":          "NOVNC_BASIC_UI",
 		"no-url-password":   "NOVNC_NO_URL_PASSWORD",
 		"novnc-params":      "NOVNC_PARAMS",
@@ -134,7 +137,7 @@ func main() {
 	r.Use(serverHeader)
 
 	vnc := vncHandler(*host, *port, *verbose, *arbitraryHosts, *arbitraryPorts, cidrList, isWhitelist)
-	r.Handle("/vnc", vnc)
+		r.Handle("/vnc", vnc)
 	r.Handle("/vnc/{host:[a-zA-Z0-9_.-]+}", vnc)
 	r.Handle("/vnc/{host:[a-zA-Z0-9_.-]+}/{port:[0-9]+}", vnc)
 	r.Handle("/vnc/{host:"+ipv6Regexp+"}", vnc)
@@ -150,6 +153,8 @@ func main() {
 			"host":            *host,
 			"port":            *port,
 			"addr":            *addr,
+			"minWidth": 	   *minWidth,
+			"minHeight": 	   *minHeight,
 			"basicUI":         *basicUI,
 			"noURLPassword":   *noURLPassword,
 			"defaultViewOnly": *defaultViewOnly,

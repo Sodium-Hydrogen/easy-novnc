@@ -2,6 +2,7 @@
 An easy way to run a [noVNC](https://github.com/novnc/noVNC) instance and proxy with a single binary.
 
 ## Features
+- Modifications to noVNC to make mobile device use even better.
 - Clean start page.
 - CIDR whitelist/blacklist.
 - Optionally allow connections to arbitrary hosts (and ports).
@@ -13,14 +14,11 @@ An easy way to run a [noVNC](https://github.com/novnc/noVNC) instance and proxy 
 - Optional [client](./wstcp) for local TCP connections tunneled through WebSockets.
 
 ## Installation
-- Binaries for the latest commit can be downloaded [here](https://ci.appveyor.com/project/pgaskin/easy-novnc/build/artifacts).
-- It can also be [deployed to Heroku](https://heroku.com/deploy).
-- A Docker image is available: [geek1011/easy-novnc:latest](https://hub.docker.com/r/geek1011/easy-novnc).
-- You can build your own binaries with go 1.13 or newer using `go get github.com/pgaskin/easy-novnc` or by cloning this repo and running `go build`.
+- You can build your own binaries with go 1.20 or newer using `go get github.com/sodium-hydrogen/easy-novnc` or by cloning this repo and running `go build`.
 
 ## Usage
 ```
-Usage: easy-novnc [options]
+Usage: ./easy-novnc [options]
 
 Options:
   -a, --addr string              The address to listen on (env NOVNC_ADDR) (default ":8080")
@@ -32,7 +30,10 @@ Options:
       --default-view-only        Use view-only by default (env NOVNC_DEFAULT_VIEW_ONLY)
       --help                     Show this help text
   -h, --host string              The host/ip to connect to by default (env NOVNC_HOST) (default "localhost")
+  -m, --min-height uint16        The minimum height of the noVNC window (env NOVNC_MIN_HEIGHT)
+  -w, --min-width uint16         The minimum width of the noVNC window (env NOVNC_MIN_WIDTH)
       --no-url-password          Do not allow password in URL params (env NOVNC_NO_URL_PASSWORD)
+      --novnc-params strings     Extra URL params for noVNC (advanced) (comma separated key-value pairs) (e.g. resize=remote) (env NOVNC_PARAMS)
   -p, --port uint16              The port to connect to by default (env NOVNC_PORT) (default 5900)
   -v, --verbose                  Show extra log info (env NOVNC_VERBOSE)
 ```

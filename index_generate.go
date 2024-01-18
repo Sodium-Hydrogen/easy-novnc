@@ -1,4 +1,4 @@
-// +build index_generate
+//go:build index_generate
 
 package main
 

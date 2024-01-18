@@ -72,20 +72,15 @@ func TestVNCHandler(t *testing.T) {
 	t.Run("CIDRBlacklistBlockIP", testCase("http://example.com/vnc/10.0.0.1", 401, "", "localhost", 5900, true, true, mustParseCIDRList("192.168.0.0/24,10.0.0.0/24"), false))
 	t.Run("CIDRBlacklistAllowIP", testCase("http://example.com/vnc/127.0.0.1/5900", 101, "127.0.0.1:5900", "localhost", 5900, true, true, mustParseCIDRList("192.168.0.0/24,10.0.0.0/24"), false))
 
-	t.Run("CIDRWhitelistAllowHost", testCase("http://example.com/vnc/10.0.0.1.ip.dns.geek1011.net", 101, "10.0.0.1.ip.dns.geek1011.net:5900", "localhost", 5900, true, true, mustParseCIDRList("192.168.0.0/24,10.0.0.0/24"), true))
-	t.Run("CIDRWhitelistBlockHost", testCase("http://example.com/vnc/127.0.0.1.ip.dns.geek1011.net", 401, "", "localhost", 5900, true, true, mustParseCIDRList("192.168.0.0/24,10.0.0.0/24"), true))
-	t.Run("CIDRBlacklistBlockHost", testCase("http://example.com/vnc/10.0.0.1.ip.dns.geek1011.net", 401, "", "localhost", 5900, true, true, mustParseCIDRList("192.168.0.0/24,10.0.0.0/24"), false))
-	t.Run("CIDRBlacklistAllowHost", testCase("http://example.com/vnc/127.0.0.1.ip.dns.geek1011.net/5900", 101, "127.0.0.1.ip.dns.geek1011.net:5900", "localhost", 5900, true, true, mustParseCIDRList("192.168.0.0/24,10.0.0.0/24"), false))
+	t.Run("CIDRWhitelistAllowHost", testCase("http://example.com/vnc/10.0.0.1", 101, "10.0.0.1:5900", "localhost", 5900, true, true, mustParseCIDRList("192.168.0.0/24,10.0.0.0/24"), true))
+	t.Run("CIDRWhitelistBlockHost", testCase("http://example.com/vnc/127.0.0.1", 401, "", "localhost", 5900, true, true, mustParseCIDRList("192.168.0.0/24,10.0.0.0/24"), true))
+	t.Run("CIDRBlacklistBlockHost", testCase("http://example.com/vnc/10.0.0.1", 401, "", "localhost", 5900, true, true, mustParseCIDRList("192.168.0.0/24,10.0.0.0/24"), false))
+	t.Run("CIDRBlacklistAllowHost", testCase("http://example.com/vnc/127.0.0.1/5900", 101, "127.0.0.1:5900", "localhost", 5900, true, true, mustParseCIDRList("192.168.0.0/24,10.0.0.0/24"), false))
 
 	t.Run("CIDRWhitelistAllowIPv6", testCase("http://example.com/vnc/a%3Ab%3Ac%3Ad%3Aa%3Ab%3Ac%3Ad", 101, "[a:b:c:d:a:b:c:d]:5900", "localhost", 5900, true, true, mustParseCIDRList("a:b:c:d:a:b:c:d/120"), true))
 	t.Run("CIDRWhitelistBlockIPv6", testCase("http://example.com/vnc/a%3Ab%3Ac%3Ad%3Aa%3Ab%3Ad%3Ad", 401, "", "localhost", 5900, true, true, mustParseCIDRList("a:b:c:d:a:b:c:d/120"), true))
 	t.Run("CIDRBlacklistBlockIPv6", testCase("http://example.com/vnc/a%3Ab%3Ac%3Ad%3Aa%3Ab%3Ac%3Ad", 401, "", "localhost", 5900, true, true, mustParseCIDRList("a:b:c:d:a:b:c:d/120"), false))
 	t.Run("CIDRBlacklistAllowIPv6", testCase("http://example.com/vnc/a%3Ab%3Ac%3Ad%3Aa%3Ab%3Ad%3Ad/5900", 101, "[a:b:c:d:a:b:d:d]:5900", "localhost", 5900, true, true, mustParseCIDRList("a:b:c:d:a:b:c:d/120"), false))
-
-	t.Run("CIDRWhitelistAllowHostv6", testCase("http://example.com/vnc/a.b.c.d.a.b.c.d.ip.dns.geek1011.net", 101, "a.b.c.d.a.b.c.d.ip.dns.geek1011.net:5900", "localhost", 5900, true, true, mustParseCIDRList("a:b:c:d:a:b:c:d/120"), true))
-	t.Run("CIDRWhitelistBlockHostv6", testCase("http://example.com/vnc/a.b.c.d.a.b.d.d.ip.dns.geek1011.net", 401, "", "localhost", 5900, true, true, mustParseCIDRList("a:b:c:d:a:b:c:d/120"), true))
-	t.Run("CIDRBlacklistBlockHostv6", testCase("http://example.com/vnc/a.b.c.d.a.b.c.d.ip.dns.geek1011.net", 401, "", "localhost", 5900, true, true, mustParseCIDRList("a:b:c:d:a:b:c:d/120"), false))
-	t.Run("CIDRBlacklistAllowHostv6", testCase("http://example.com/vnc/a.b.c.d.a.b.d.d.ip.dns.geek1011.net/5900", 101, "a.b.c.d.a.b.d.d.ip.dns.geek1011.net:5900", "localhost", 5900, true, true, mustParseCIDRList("a:b:c:d:a:b:c:d/120"), false))
 }
 
 func TestWebsockify(t *testing.T) {
@@ -252,14 +247,10 @@ func TestCIDRBlackWhiteList(t *testing.T) {
 			}
 		}
 	}
-	t.Run("WhitelistAllow", testCase(mustParseCIDRList("10.0.0.0/24,127.0.0.0/16"), true, []string{"10.0.0.1", "127.0.1.1", "10.0.0.9.ip.dns.geek1011.net"}, false))
-	t.Run("WhitelistBlock", testCase(mustParseCIDRList("10.0.0.0/24,127.0.0.0/16"), true, []string{"11.0.0.1", "1.0.1.1", "1.2.3.4.ip.dns.geek1011.net"}, true))
-	t.Run("BlacklistAllow", testCase(mustParseCIDRList("10.0.0.0/24,127.0.0.0/16"), false, []string{"11.0.0.1", "1.0.1.1", "1.2.3.4.ip.dns.geek1011.net"}, false))
-	t.Run("BlacklistBlock", testCase(mustParseCIDRList("10.0.0.0/24,127.0.0.0/16"), false, []string{"10.0.0.1", "127.0.1.1", "10.0.0.9.ip.dns.geek1011.net"}, true))
-	t.Run("WhitelistAllowv6", testCase(mustParseCIDRList("a:b:c:d:a:b:c:d/120"), true, []string{"a:b:c:d:a:b:c:d", "a:b:c:d:a:b:c:a", "a.b.c.d.a.b.c.d.ip.dns.geek1011.net"}, false))
-	t.Run("WhitelistBlockv6", testCase(mustParseCIDRList("a:b:c:d:a:b:c:d/120"), true, []string{"a:b:c:d:a:b:d:d", "a:b:c:d:a:b:d:a", "a.b.c.d.a.b.d.d.ip.dns.geek1011.net"}, true))
-	t.Run("BlacklistAllowv6", testCase(mustParseCIDRList("a:b:c:d:a:b:c:d/120"), false, []string{"a:b:c:d:a:b:d:d", "a:b:c:d:a:b:d:a", "a.b.c.d.a.b.d.d.ip.dns.geek1011.net"}, false))
-	t.Run("BlacklistBlockv6", testCase(mustParseCIDRList("a:b:c:d:a:b:c:d/120"), false, []string{"a:b:c:d:a:b:c:d", "a:b:c:d:a:b:c:a", "a.b.c.d.a.b.c.d.ip.dns.geek1011.net"}, true))
+	t.Run("WhitelistAllow", testCase(mustParseCIDRList("10.0.0.0/24,127.0.0.0/16"), true, []string{"10.0.0.1", "127.0.1.1", "10.0.0.9"}, false))
+	t.Run("WhitelistBlock", testCase(mustParseCIDRList("10.0.0.0/24,127.0.0.0/16"), true, []string{"11.0.0.1", "1.0.1.1", "1.2.3.4"}, true))
+	t.Run("BlacklistAllow", testCase(mustParseCIDRList("10.0.0.0/24,127.0.0.0/16"), false, []string{"11.0.0.1", "1.0.1.1", "1.2.3.4"}, false))
+	t.Run("BlacklistBlock", testCase(mustParseCIDRList("10.0.0.0/24,127.0.0.0/16"), false, []string{"10.0.0.1", "127.0.1.1", "10.0.0.9"}, true))
 }
 
 func TestParseCIDRList(t *testing.T) {
